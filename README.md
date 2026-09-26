@@ -1,8 +1,12 @@
 # Loja das Comunidades Tech BR — Modelo de Negócios
 
 > Documento para discussão com as comunidades de tecnologia do Brasil (piloto: comunidade PHP Brasil).
-> Versão 0.4 — 25/09/2026 — **rascunho aberto a contribuições**
+> Versão 0.5 — 25/09/2026 — **rascunho aberto a contribuições**
 > *"Loja das Comunidades Tech BR" é nome provisório.*
+
+**Mudanças da v0.5**
+- Nova seção **Stack técnica sugerida** (§16): proposta inicial de arquitetura para abrir a discussão técnica da Fase 0.
+- Q3 (§14) complementada com candidatos concretos de gateway a avaliar em sandbox: **Asaas** e **Pagar.me**.
 
 **Mudanças da v0.4**
 - Três novas regras de negócio **propostas para discussão** (marcadas 🔶, não decididas): RN42 (reserva de tiragem limitada para evitar overselling), RN43 (encerramento/saída de comunidade) e RN44 (retenção/exclusão de dados pessoais, LGPD). Novas linhas Q20 e Q21 em §14 registram os riscos que motivaram as propostas.
@@ -74,6 +78,7 @@ flowchart LR
 13. [Mapa de navegação](#13-mapa-de-navegação)
 14. [Riscos e pontos em aberto](#14-riscos-e-pontos-em-aberto)
 15. [Roadmap sugerido](#15-roadmap-sugerido)
+16. [Stack técnica sugerida](#16-stack-técnica-sugerida)
 
 ---
 
@@ -1593,7 +1598,7 @@ flowchart LR
 |---|---|---|---|
 | Q1 | **Taxa do gateway** | ✅ Decidido: parcelado repassado ao cliente por padrão (a comunidade pode assumir); taxa % do cartão negociável com o fornecedor; resto rateado pela margem | — |
 | Q2 | **Sustentabilidade da plataforma** | ✅ Decidido: tarifa de R$ 2,49 por saque de comunidade ou fornecedor (RN24c). Acompanhar se a receita cobre os custos, principalmente os de e-mail | — |
-| Q3 | **Gateway** | Permite cobrar a tarifa de saque da plataforma (transferência entre subcontas ou taxa no saque)? Suporta split com N recebedores, estorno parcial com reversão de split, subcontas para PF e repasse da taxa do parcelado ao cliente (acréscimo) e desconto de taxa em recebedor específico (fornecedor que absorve %)? Estorno devolve a taxa? Prazo de recebimento (D+?) por forma de pagamento? | Validar a API antes de fechar a arquitetura |
+| Q3 | **Gateway** | Permite cobrar a tarifa de saque da plataforma (transferência entre subcontas ou taxa no saque)? Suporta split com N recebedores, estorno parcial com reversão de split, subcontas para PF e repasse da taxa do parcelado ao cliente (acréscimo) e desconto de taxa em recebedor específico (fornecedor que absorve %)? Estorno devolve a taxa? Prazo de recebimento (D+?) por forma de pagamento? | Candidatos a avaliar em sandbox: **Asaas** e **Pagar.me** (ver comparativo em §16). Validar a API na prática antes de fechar a arquitetura |
 | Q4 | **API dos Correios** | A API oficial (CWS) exige contrato; cada fornecedor tem o seu? | Cotação com contrato da plataforma ou dos fornecedores; avaliar agregadores (Melhor Envio etc.) como alternativa |
 | Q5 | **Responsabilidade legal** | Quem emite nota fiscal? Comunidades sem CNPJ podem vender? | Fornecedor emite NF da venda do produto; comunidade recebe a margem como intermediação/doação. **Validar com contador** |
 | Q6 | **Chargeback** | Quem arca com contestação de cartão? | Definir regra no termo de uso; possível reserva/retensão da comunidade |
@@ -1630,6 +1635,57 @@ flowchart LR
 | **1 — MVP** | Loja (L01–L10), painel comunidade básico (produtos, pedidos, financeiro), painel fornecedor (pedidos + rastreio), split no gateway com as 4 formas de pagamento, tabela de taxas, parcelamento repassado/assumido e destaque do Pix, frete Correios, e-mails E01–E03. **Análise de originalidade manual** (fila A07/A08, aprovar/reprovar com motivo). **Acompanhar comunidade simples** (seguir/deixar, e-mail E08 agrupado, descadastro). Fornecedores cadastrados manualmente pelo admin |
 | **2 — Escala** | Autoatendimento de comunidades e fornecedores, múltiplos membros e papéis, diretório por tecnologia/região, coleções/edições com tiragem, estorno pelo painel, rastreio automático, preferências por tipo de lançamento (L11), histórico de lançamentos (C05b), acordo de taxa % com fornecedor (C06), pré-checagem automática de referências, autorizações e denúncias (C11) |
 | **3 — Extras** | Avaliações, cupons, pré-venda de edições, kits (camisa + caneca + mascote), novos eventos de lançamento (pré-venda, reposição, evento anunciado), relatório público de transparência por comunidade |
+
+---
+
+## 16. Stack técnica sugerida
+
+> Proposta inicial para abrir a discussão técnica da Fase 0 (§15). Nada aqui está travado — é um ponto de partida concreto, não uma decisão final.
+
+### Visão geral
+
+| Camada | Proposta | Por quê |
+|---|---|---|
+| Backend principal | **Laravel Octane** (PHP), modularizado desde o início | Performance de processo long-running; começa monólito modular e migra pedaços para microsserviço só quando a escala pedir |
+| Painéis internos (Admin, Comunidade, Fornecedor) | **FilamentPHP**, com multi-panel + multi-tenancy | As telas A0x/C0x/F0x são majoritariamente CRUD + dashboard + financeiro — o ponto forte do Filament. Cobrindo os três painéis com ele, sobra só a loja pública para construir do zero |
+| Loja pública + área do cliente | **Nuxt** (Vue) + **DaisyUI** | SSR ajuda no SEO das páginas de produto/comunidade (§2); DaisyUI já é a biblioteca de UI decidida no §12 e funciona igual dentro do Nuxt |
+| Mobile | **Flutter** | Um único código para Android/iOS; app do cliente consome a mesma API do Octane usada pelo Nuxt |
+| Banco de dados | **PostgreSQL** | JSONB para campos como `precheck` (ANALISE_PRODUTO, §11), tipos numéricos exatos para dinheiro, melhor concorrência em saldo/saque que MySQL |
+| Filas / jobs | **Redis + Laravel Horizon** | Já é peça central dos fluxos desenhados nos diagramas 9.3 e 9.7 (e-mail em lote, notificação de lançamento, sync de rastreio) |
+| Busca | **Laravel Scout + Meilisearch/Typesense** | Filtros de L03/L03b (tecnologia, região, comunidade, categoria) |
+| Storage de arquivos | **S3-compatible** (ex. Cloudflare R2) | Fotos de produto e artes de impressão (tela F05) |
+| E-mail transacional | **Postmark / SES / Resend** + SPF/DKIM/DMARC | Mitiga o risco de reputação de domínio já levantado na Q13 |
+| Observabilidade | **Sentry + Laravel Pulse** | Importante em especial com Octane, para pegar cedo estado vazado entre requests |
+| Testes | **Pest**, com foco em cobertura das fórmulas de split (§6) | A lógica financeira é a de maior risco no sistema |
+| Cálculo monetário | Value object em centavos (ex. `brick/money`), nunca float | Evita bug de arredondamento no rateio entre comunidades (§6) |
+| Idempotência de webhook | Tabela de eventos processados | Já previsto em RN16/§9.2, mas ainda não detalhado |
+
+### Modularização do backend
+
+Sugestão de organizar o Octane desde o início em módulos alinhados às regras de negócio, para que uma futura extração em microsserviço seja uma costura natural e não um corte no meio do monólito:
+
+- `Comunidades`
+- `Fornecedores`
+- `Produtos`
+- `Moderacao` (RN32–RN41)
+- `Pedidos`
+- `Pagamentos` / `Split`
+- `Seguidores` / `Notificacoes` (RN25–RN31)
+
+`Moderacao` e `Pagamentos/Split` são os candidatos mais prováveis a sair primeiro como serviço isolado, por terem fila e latência próprias.
+
+> **Cuidado com Octane:** como o processo é long-running (Swoole/RoadRunner), estado vazado entre requests (singletons, estáticos, conexão de banco presa) é uma classe de bug própria — vale mapear isso cedo nos testes, não só contar com o ganho de performance.
+
+### Gateway de pagamento — candidatos (complementa a Q3)
+
+| Gateway | Pontos fortes | Pontos de atenção |
+|---|---|---|
+| **Asaas** | Split nativo multi-recebedor, subcontas com KYC (inclusive PF — ajuda a Q5, comunidade sem CNPJ), cartão parcelado maduro, estorno com reversão de split | Validar limite de recebedores por split e SLA de ativação de subconta |
+| **Pagar.me** (Stone) | Split de marketplace é um dos produtos mais maduros do mercado nesse nicho, boa documentação, muito usado por marketplaces brasileiros | Onboarding/KYC de recebedor pode ser mais burocrático |
+
+Outros gateways com Pix forte (ex. Woovi) foram considerados, mas o suporte a cartão parcelado ainda é recurso mais recente/menos maduro neles — e o modelo depende de parcelamento robusto (RN21), o que pesa contra.
+
+**Sugestão de próximo passo (Fase 0):** spike técnico — abrir sandbox no Asaas e no Pagar.me, testar split + estorno parcial + parcelamento 2x–6x + tempo de ativação de subconta, antes de comprometer a arquitetura.
 
 ---
 
