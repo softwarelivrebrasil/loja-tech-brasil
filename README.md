@@ -6,7 +6,7 @@
 
 **Mudanças da v0.5**
 - Nova seção **Stack técnica sugerida** (§16): proposta inicial de arquitetura para abrir a discussão técnica da Fase 0.
-- Q3 (§14) complementada com candidatos concretos de gateway a avaliar em sandbox: **Asaas** e **Pagar.me**.
+- Q3 (§14) complementada com candidatos concretos de gateway a avaliar em sandbox: **GeffinPay** (candidato preferido), **Asaas** e **Pagar.me**.
 
 **Mudanças da v0.4**
 - Três novas regras de negócio **propostas para discussão** (marcadas 🔶, não decididas): RN42 (reserva de tiragem limitada para evitar overselling), RN43 (encerramento/saída de comunidade) e RN44 (retenção/exclusão de dados pessoais, LGPD). Novas linhas Q20 e Q21 em §14 registram os riscos que motivaram as propostas.
@@ -1598,7 +1598,7 @@ flowchart LR
 |---|---|---|---|
 | Q1 | **Taxa do gateway** | ✅ Decidido: parcelado repassado ao cliente por padrão (a comunidade pode assumir); taxa % do cartão negociável com o fornecedor; resto rateado pela margem | — |
 | Q2 | **Sustentabilidade da plataforma** | ✅ Decidido: tarifa de R$ 2,49 por saque de comunidade ou fornecedor (RN24c). Acompanhar se a receita cobre os custos, principalmente os de e-mail | — |
-| Q3 | **Gateway** | Permite cobrar a tarifa de saque da plataforma (transferência entre subcontas ou taxa no saque)? Suporta split com N recebedores, estorno parcial com reversão de split, subcontas para PF e repasse da taxa do parcelado ao cliente (acréscimo) e desconto de taxa em recebedor específico (fornecedor que absorve %)? Estorno devolve a taxa? Prazo de recebimento (D+?) por forma de pagamento? | Candidatos a avaliar em sandbox: **Asaas** e **Pagar.me** (ver comparativo em §16). Validar a API na prática antes de fechar a arquitetura |
+| Q3 | **Gateway** | Permite cobrar a tarifa de saque da plataforma (transferência entre subcontas ou taxa no saque)? Suporta split com N recebedores, estorno parcial com reversão de split, subcontas para PF e repasse da taxa do parcelado ao cliente (acréscimo) e desconto de taxa em recebedor específico (fornecedor que absorve %)? Estorno devolve a taxa? Prazo de recebimento (D+?) por forma de pagamento? | Candidato preferido: **GeffinPay**; alternativas: **Asaas** e **Pagar.me** (ver comparativo em §16). Validar a API na prática antes de fechar a arquitetura |
 | Q4 | **API dos Correios** | A API oficial (CWS) exige contrato; cada fornecedor tem o seu? | Cotação com contrato da plataforma ou dos fornecedores; avaliar agregadores (Melhor Envio etc.) como alternativa |
 | Q5 | **Responsabilidade legal** | Quem emite nota fiscal? Comunidades sem CNPJ podem vender? | Fornecedor emite NF da venda do produto; comunidade recebe a margem como intermediação/doação. **Validar com contador** |
 | Q6 | **Chargeback** | Quem arca com contestação de cartão? | Definir regra no termo de uso; possível reserva/retensão da comunidade |
@@ -1680,12 +1680,13 @@ Sugestão de organizar o Octane desde o início em módulos alinhados às regras
 
 | Gateway | Pontos fortes | Pontos de atenção |
 |---|---|---|
+| **GeffinPay** ⭐ *(candidato preferido)* | Melhor candidato para o modelo da loja: primeira opção a validar no spike | Confirmar na documentação/sandbox todos os requisitos da Q3: split com N recebedores, subcontas PF (Q5), parcelamento 2x–6x com repasse ao cliente (RN21), estorno parcial com reversão de split, cobrança da tarifa de saque (R$ 2,49) e taxas reais vs. RN19 |
 | **Asaas** | Split nativo multi-recebedor, subcontas com KYC (inclusive PF — ajuda a Q5, comunidade sem CNPJ), cartão parcelado maduro, estorno com reversão de split | Validar limite de recebedores por split e SLA de ativação de subconta |
 | **Pagar.me** (Stone) | Split de marketplace é um dos produtos mais maduros do mercado nesse nicho, boa documentação, muito usado por marketplaces brasileiros | Onboarding/KYC de recebedor pode ser mais burocrático |
 
 Outros gateways com Pix forte (ex. Woovi) foram considerados, mas o suporte a cartão parcelado ainda é recurso mais recente/menos maduro neles — e o modelo depende de parcelamento robusto (RN21), o que pesa contra.
 
-**Sugestão de próximo passo (Fase 0):** spike técnico — abrir sandbox no Asaas e no Pagar.me, testar split + estorno parcial + parcelamento 2x–6x + tempo de ativação de subconta, antes de comprometer a arquitetura.
+**Sugestão de próximo passo (Fase 0):** spike técnico — começar pelo sandbox do **GeffinPay**; se algum requisito da Q3 não for atendido, cair para Asaas e depois Pagar.me. Em cada um, testar split + estorno parcial + parcelamento 2x–6x + tempo de ativação de subconta, antes de comprometer a arquitetura.
 
 ---
 
