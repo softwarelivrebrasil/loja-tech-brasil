@@ -1,8 +1,11 @@
 # Loja das Comunidades Tech BR — Modelo de Negócios
 
 > Documento para discussão com as comunidades de tecnologia do Brasil (piloto: comunidade PHP Brasil).
-> Versão 0.5 — 25/09/2026 — **rascunho aberto a contribuições**
+> Versão 0.6 — 27/09/2026 — **rascunho aberto a contribuições**
 > *"Loja das Comunidades Tech BR" é nome provisório.*
+
+**Mudanças da v0.6**
+- §16 detalha a organização do repositório: **monorepo** (`apps/backend`, `apps/admin`, `apps/web` + `packages/*` por módulo de negócio) enquanto o time é pequeno, com pacotes Composer próprios por módulo (via *path repository*) em vez de um pacote único de domínio. Recomenda o pacote **`internachi/modular`** para o scaffolding.
 
 **Mudanças da v0.5**
 - Nova seção **Stack técnica sugerida** (§16): proposta inicial de arquitetura para abrir a discussão técnica da Fase 0.
@@ -1647,8 +1650,9 @@ flowchart LR
 | Camada | Proposta | Por quê |
 |---|---|---|
 | Backend principal | **Laravel Octane** (PHP), modularizado desde o início | Performance de processo long-running; começa monólito modular e migra pedaços para microsserviço só quando a escala pedir |
-| Painéis internos (Admin, Comunidade, Fornecedor) | **FilamentPHP**, com multi-panel + multi-tenancy | As telas A0x/C0x/F0x são majoritariamente CRUD + dashboard + financeiro — o ponto forte do Filament. Cobrindo os três painéis com ele, sobra só a loja pública para construir do zero |
-| Loja pública + área do cliente | **Nuxt** (Vue) + **DaisyUI** | SSR ajuda no SEO das páginas de produto/comunidade (§2); DaisyUI já é a biblioteca de UI decidida no §12 e funciona igual dentro do Nuxt |
+| Organização do código | **Monorepo** com `apps/backend`, `apps/admin` e `apps/web`, mais `packages/*` por módulo de negócio | Backend e painel Filament são projetos Laravel separados, mas precisam falar a mesma língua de domínio — ver detalhe abaixo |
+| Painéis internos (Admin, Comunidade, Fornecedor) | **FilamentPHP**, em projeto próprio (`apps/admin`), com multi-panel + multi-tenancy | As telas A0x/C0x/F0x são majoritariamente CRUD + dashboard + financeiro — o ponto forte do Filament. Cobrindo os três painéis com ele, sobra só a loja pública para construir do zero |
+| Loja pública + área do cliente | **Nuxt** (Vue) + **DaisyUI**, em `apps/web` | SSR ajuda no SEO das páginas de produto/comunidade (§2); DaisyUI já é a biblioteca de UI decidida no §12 e funciona igual dentro do Nuxt |
 | Mobile | **Flutter** | Um único código para Android/iOS; app do cliente consome a mesma API do Octane usada pelo Nuxt |
 | Banco de dados | **PostgreSQL** | JSONB para campos como `precheck` (ANALISE_PRODUTO, §11), tipos numéricos exatos para dinheiro, melhor concorrência em saldo/saque que MySQL |
 | Filas / jobs | **Redis + Laravel Horizon** | Já é peça central dos fluxos desenhados nos diagramas 9.3 e 9.7 (e-mail em lote, notificação de lançamento, sync de rastreio) |
@@ -1660,19 +1664,43 @@ flowchart LR
 | Cálculo monetário | Value object em centavos (ex. `brick/money`), nunca float | Evita bug de arredondamento no rateio entre comunidades (§6) |
 | Idempotência de webhook | Tabela de eventos processados | Já previsto em RN16/§9.2, mas ainda não detalhado |
 
-### Modularização do backend
+### Organização do repositório: monorepo por enquanto
 
-Sugestão de organizar o Octane desde o início em módulos alinhados às regras de negócio, para que uma futura extração em microsserviço seja uma costura natural e não um corte no meio do monólito:
+O painel Filament (`apps/admin`) não vive no mesmo projeto do backend (`apps/backend`, Octane) — são dois projetos Laravel separados. Mas os dois precisam falar a mesma língua de domínio (mesmos Models, mesmas regras de negócio, mesmo banco). Proposta: um **monorepo** enquanto o time e os módulos ainda são pequenos — um repositório Git só, com os projetos Laravel e o Nuxt lado a lado, incluindo a loja pública:
 
-- `Comunidades`
-- `Fornecedores`
-- `Produtos`
-- `Moderacao` (RN32–RN41)
-- `Pedidos`
-- `Pagamentos` / `Split`
-- `Seguidores` / `Notificacoes` (RN25–RN31)
+```
+/repo (monorepo)
+  /apps
+    /backend        (Laravel Octane — API para Nuxt, Flutter e Filament)
+    /admin           (Laravel + FilamentPHP — painéis Admin, Comunidade, Fornecedor)
+    /web             (Nuxt — loja pública e área do cliente)
+  /packages
+    /comunidades     (loja/comunidades)
+    /fornecedores    (loja/fornecedores)
+    /produtos        (loja/produtos)
+    /moderacao       (loja/moderacao — RN32–RN41)
+    /pedidos         (loja/pedidos)
+    /pagamentos      (loja/pagamentos — Split, Pagamento, Saque, TabelaTaxa)
+    /notificacoes    (loja/notificacoes — Seguidores, Lote, Evento, RN25–RN31)
+```
 
-`Moderacao` e `Pagamentos/Split` são os candidatos mais prováveis a sair primeiro como serviço isolado, por terem fila e latência próprias.
+**Por que monorepo agora:** uma mudança de regra de negócio que afeta backend e admin ao mesmo tempo entra num PR só; não tem versionamento de pacote privado pra sincronizar nem release coordenado entre repositórios separados enquanto o time é pequeno. Quando algum módulo ganhar ritmo de deploy próprio de verdade (o caso mais provável é `pagamentos`, virando microsserviço — ver abaixo), aí faz sentido esse módulo sair pro seu próprio repositório. Não é definitivo, é a opção mais simples pra fase atual.
+
+### Pacotes por módulo (`packages/*`)
+
+Cada módulo de negócio vira um **pacote Composer próprio** (não um único pacote genérico de "domínio"): `composer.json` com `type: library`, autoload PSR-4 de `src/` (Models, Actions, DTOs, Enums, Events), migrations próprias e um `ServiceProvider` que o Laravel auto-descobre.
+
+Isso é resolvido com *path repositories* do Composer — `apps/backend/composer.json` e `apps/admin/composer.json` declaram:
+
+```json
+"repositories": [{ "type": "path", "url": "../../packages/*" }]
+```
+
+e requerem cada pacote (`loja/produtos`, `loja/pagamentos`...) como dependência normal. Existe uma ferramenta pronta pra esse tipo de scaffolding modular em Laravel — **[`internachi/modular`](https://github.com/InterNACHI/modular)** — que gera com um comando (`php artisan module:make produtos`) o composer.json, o ServiceProvider, as pastas PSR-4 e a estrutura de teste do módulo, em vez de montar isso tudo na mão. Vale adotar em vez de reinventar o scaffolding.
+
+**Regra de disciplina que sustenta a ideia:** nenhum dos dois apps grava direto num Model que tenha lógica de negócio por trás — sempre chama a Action do pacote correspondente. É isso que evita o Filament aprovar um saque ou mudar status de produto sem passar pelo cálculo de split ou disparar a notificação de lançamento (RN41).
+
+`Moderacao` e `Pagamentos/Split` continuam os candidatos mais prováveis a sair primeiro como serviço isolado, por terem fila e latência próprias. Desenhar esses dois pacotes desde já com um **Contract (interface) + Adapter** por dentro — a Action fala com uma interface, não direto com Eloquent — deixa a troca de "consulta local" por "chamada remota" praticamente mecânica quando chegar a hora, sem precisar tocar em quem consome (`apps/backend`, `apps/admin`, `apps/web`).
 
 > **Cuidado com Octane:** como o processo é long-running (Swoole/RoadRunner), estado vazado entre requests (singletons, estáticos, conexão de banco presa) é uma classe de bug própria — vale mapear isso cedo nos testes, não só contar com o ganho de performance.
 
