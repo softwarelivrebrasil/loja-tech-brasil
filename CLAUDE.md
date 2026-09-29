@@ -1,6 +1,6 @@
 # loja-tech-brasil
 
-Loja das Comunidades Tech BR — marketplace de dropshipping para comunidades tech brasileiras (piloto: PHP Brasil). **The business rules live in [`README.md`](README.md)**, not here — read it first for anything about domain (comunidades, fornecedores, produtos, pedidos, pagamentos, moderação, o modelo de split/repasse). This file only covers the technical architecture.
+Loja das Comunidades Tech BR — marketplace de dropshipping para comunidades tech brasileiras (piloto: PHP Brasil). **The business rules live in [`README.md`](README.md)**, not here — read it first for anything about domain (comunidades, fornecedores, produtos, pedidos, pagamentos, moderação, o modelo de split/repasse). This file only covers the technical architecture. [`docs/`](docs/README.md) is the human-facing counterpart to `.claude/rules/` — same conventions, explained in Portuguese with more "why" for someone new to the project rather than as terse enforced rules.
 
 Laravel modular-monolith **monorepo**, seeded from [`base_laravel_modular`](https://github.com/tecrodrigocastro/base_laravel_modular): `apps/backend` (API), `apps/admin` (Filament, three panels), and `packages/{module}` (one Composer package per business module, shared by both apps). `apps/web` is reserved but not scaffolded yet — [`base_nuxt_modular`](https://github.com/tecrodrigocastro/base_nuxt_modular) is the planned drop-in, and only ever talks to `apps/backend`'s HTTP API, never `packages/*`.
 
