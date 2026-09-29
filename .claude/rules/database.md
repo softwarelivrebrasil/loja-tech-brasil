@@ -1,0 +1,16 @@
+# Database: one Postgres, one migration runner, two consumers
+
+`apps/backend` and `apps/admin` point at the **same physical Postgres database** (`docker-compose.yml`: both containers get identical `DB_*` env vars pointing at the one `postgres` service). This isn't incidental — `packages/identity`'s whole reason to exist is that both apps must authenticate against and reference the literal same `users`/`admins` rows (see `architecture.md`, "Two different reasons a Model must live in `packages/*`"). That only works if they're the same rows in the same table in the same database — no cross-database join, no sync job.
+
+## `apps/backend` is the only app that ever runs `migrate`
+
+- **`apps/backend` migrates everything**: its own `database/migrations/` (framework tables — `cache`, `jobs`) plus every `packages/*` migration, auto-loaded via each module's `ServiceProvider::boot()` (`loadMigrationsFrom`) — `packages/identity` (`users`, `admins`), `packages/notifications` (`notifications`) and `packages/withdrawals` (`withdrawals`) today.
+- **`apps/admin` never runs `migrate`**, and carries **no migrations of its own** — `apps/admin/database/migrations/` is empty on purpose. It only ever reads/writes through the same `packages/*` Models/tables `apps/backend` does (`App\Models\User`/`Admin` extending `Loja\Identity\Models\*`, `WithdrawalResource` on `Loja\Withdrawals\Models\Withdrawal`, Filament's database notifications on `packages/notifications`' table). Anything `apps/admin` needs a table for belongs in the relevant `packages/*` module, not in `apps/admin` itself, precisely so `apps/backend` is the one that creates it. `packages/notifications` is the concrete example — it's schema-only today (no Model, no business logic, just the migration + `ServiceProvider`), kept as its own module rather than folded into `identity` because README's roadmap already commits to a real `notifications` business module later (which app/channel to notify, not just where the table lives) — this package is where that lands.
+
+**Rule for new migrations**: a migration never goes in `apps/admin/database/migrations/`. If it's framework-infra specific to the API process, it goes in `apps/backend/database/migrations/`. Everything else — anything either app's Models touch — goes in the owning `packages/*` module, the same place its Model/Action/DTO already lives.
+
+## Docker
+
+`docker/entrypoint.sh` is shared by both containers, but only runs `php artisan migrate --force` when `RUN_MIGRATIONS=true` — set on `backend` in `docker-compose.yml`, left `false` on `admin`. `admin`'s `depends_on: backend: condition: service_healthy` (backend's healthcheck hits Laravel's own `/up` route) means `admin` doesn't even start serving requests until `backend` has finished migrating — there's no race where `admin` boots against a database that isn't ready yet.
+
+Local (non-Docker) dev is unaffected by any of this: each app's own `.env.example` still defaults to `DB_CONNECTION=sqlite`, an entirely separate file per app — the shared-database rules above only bite once both apps are pointed at the same Postgres instance, which today only happens through `docker compose up`. Running `php artisan migrate` directly against `apps/admin` outside Docker, against a Postgres database also used by `apps/backend`, would violate the same rule — don't.
