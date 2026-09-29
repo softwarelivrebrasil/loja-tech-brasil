@@ -61,6 +61,8 @@ cp .env.example .env && docker compose up   # dev environment: postgres + redis 
 - Modules likely to become a standalone service later (heavy queue/latency profile — payments, moderation-style workloads) get a `Contract` + `Adapter` pair from day one: the Action talks to the interface, the Adapter is swappable from "local Eloquent" to "remote API client" without touching callers.
 - No module reaches into another module's tables directly — no cross-package Eloquent relationship, no raw join. Cross-module reads/writes go through that module's own Action/Contract.
 - Every intra-repo `loja/*` module dependency is pinned `^1.0.0` in each app's `composer.json` — never the `*` the generator leaves behind. See `.claude/rules/naming-conventions.md`.
+- Every table's primary key is a UUID (`$table->uuid('id')->primary()` + the Model's `HasUuids` trait), never an auto-incrementing integer. See `.claude/rules/uuids.md`.
+- The mandatory security rules in `.claude/rules/security.md` apply to new code always, and to existing code whenever you touch it.
 - `apps/web`, whenever it's dropped in, never touches `packages/*` or a database directly — it only calls `apps/backend`'s HTTP API.
 
 ## Generator
@@ -79,4 +81,4 @@ cp .env.example .env && docker compose up   # dev environment: postgres + redis 
 
 Done: this repo is a real, runnable monorepo — `apps/backend` and `apps/admin` both consume `packages/withdrawals` (proving the path-repository + `ServiceProvider` auto-discovery mechanism works across two independent Laravel apps, not just within one); `apps/admin` has three working Filament panels; `make check` runs Pint, Rector, PHPStan (Larastan) and Pest cleanly across both apps and every `packages/*`; `.claude/skills/new-module/` codifies the exact steps used to build `withdrawals` by hand; the vendor namespace is already `loja/Loja` throughout, matching `README.md`. Not just documented — proven and enforced by `make check`.
 
-See `.claude/rules/naming-conventions.md` before creating new files, `.claude/rules/architecture.md` for the full rationale behind the Action/Contract/Adapter rules, `.claude/rules/tooling.md` for what `make check` actually runs, `.claude/rules/docker.md` for the dev environment, and `.claude/rules/database.md` for how `apps/backend` and `apps/admin` share one Postgres database without their migrations colliding.
+See `.claude/rules/naming-conventions.md` before creating new files, `.claude/rules/architecture.md` for the full rationale behind the Action/Contract/Adapter rules, `.claude/rules/tooling.md` for what `make check` actually runs, `.claude/rules/docker.md` for the dev environment, `.claude/rules/database.md` for how `apps/backend` and `apps/admin` share one Postgres database without their migrations colliding, `.claude/rules/uuids.md` for the UUID-everywhere convention, and `.claude/rules/security.md` for the mandatory security rules.
