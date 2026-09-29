@@ -26,3 +26,7 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 /storage/framework/phpstan
+
+**/caddy
+frankenphp
+frankenphp-worker.php

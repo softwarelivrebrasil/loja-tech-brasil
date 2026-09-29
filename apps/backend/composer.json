@@ -9,12 +9,14 @@
     ],
     "license": "MIT",
     "require": {
-        "php": "^8.3",
-        "loja/identity": "^1.0.0",
-        "loja/withdrawals": "^1.0.0",
+        "php": "^8.4",
         "internachi/modular": "^3.0",
         "laravel/framework": "^13.17",
-        "laravel/tinker": "^3.0"
+        "laravel/octane": "^2.20",
+        "laravel/tinker": "^3.0",
+        "loja/identity": "^1.0.0",
+        "loja/notifications": "^1.0.0",
+        "loja/withdrawals": "^1.0.0"
     },
     "require-dev": {
         "driftingly/rector-laravel": "^2.6",
