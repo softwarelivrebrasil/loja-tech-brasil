@@ -2,3 +2,6 @@
 *.log
 .idea
 .vscode
+
+# docker-compose vars (POSTGRES_*/ports) — copy .env.example, no secrets by default
+/.env

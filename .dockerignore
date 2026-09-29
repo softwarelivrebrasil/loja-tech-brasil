@@ -1,0 +1,13 @@
+.git
+.claude
+**/.claude
+**/vendor
+**/node_modules
+**/public/build
+**/storage/framework/cache/*
+**/storage/framework/sessions/*
+**/storage/framework/views/*
+**/storage/logs/*
+**/.env
+**/*.sqlite
+.DS_Store

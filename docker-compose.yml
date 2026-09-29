@@ -1,0 +1,100 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-loja}
+      POSTGRES_USER: ${POSTGRES_USER:-loja}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-loja}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-loja} -d ${POSTGRES_DB:-loja}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment: &app_env
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: ${POSTGRES_DB:-loja}
+      DB_USERNAME: ${POSTGRES_USER:-loja}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-loja}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      # Only apps/backend migrates — its own tables + every packages/* module.
+      # apps/admin only ever consumes those same tables through packages/*,
+      # it never runs migrate itself. See .claude/rules/database.md.
+      RUN_MIGRATIONS: "true"
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    volumes:
+      - .:/var/www
+      - backend_vendor:/var/www/apps/backend/vendor
+      - backend_node_modules:/var/www/apps/backend/node_modules
+      - backend_build:/var/www/apps/backend/public/build
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8000/up"]
+      interval: 5s
+      timeout: 5s
+      retries: 40
+      start_period: 180s
+
+  admin:
+    build:
+      context: .
+      dockerfile: docker/admin/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+    environment:
+      <<: *app_env
+      RUN_MIGRATIONS: "false"
+    ports:
+      - "${ADMIN_PORT:-8001}:8001"
+    volumes:
+      - .:/var/www
+      - admin_vendor:/var/www/apps/admin/vendor
+      - admin_node_modules:/var/www/apps/admin/node_modules
+      - admin_build:/var/www/apps/admin/public/build
+
+volumes:
+  postgres_data:
+  redis_data:
+  backend_vendor:
+  backend_node_modules:
+  backend_build:
+  admin_vendor:
+  admin_node_modules:
+  admin_build:
