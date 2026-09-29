@@ -4,13 +4,14 @@ use Loja\Withdrawals\Actions\RequestWithdrawalAction;
 use Loja\Withdrawals\DTOs\RequestWithdrawalDTO;
 use Loja\Withdrawals\Enums\WithdrawalStatus;
 use Loja\Withdrawals\Exceptions\InvalidWithdrawalAmountException;
+use Illuminate\Support\Str;
 
 it('creates a Withdrawal with the flat fee already discounted', function () {
     $withdrawal = (new RequestWithdrawalAction)->execute(new RequestWithdrawalDTO(
         recipientType: 'community',
-        recipientId: 1,
+        recipientId: (string) Str::uuid(),
         amount: 100.00,
-        requestedBy: 42,
+        requestedBy: (string) Str::uuid(),
     ));
 
     expect($withdrawal->fee)->toEqual('2.49')
@@ -21,8 +22,8 @@ it('creates a Withdrawal with the flat fee already discounted', function () {
 it('rejects a withdrawal that would not cover the flat fee', function () {
     (new RequestWithdrawalAction)->execute(new RequestWithdrawalDTO(
         recipientType: 'community',
-        recipientId: 1,
+        recipientId: (string) Str::uuid(),
         amount: 2.00,
-        requestedBy: 42,
+        requestedBy: (string) Str::uuid(),
     ));
 })->throws(InvalidWithdrawalAmountException::class);

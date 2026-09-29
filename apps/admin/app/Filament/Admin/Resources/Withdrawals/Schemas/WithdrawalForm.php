@@ -16,8 +16,7 @@ class WithdrawalForm
                 TextInput::make('recipient_type')
                     ->required(),
                 TextInput::make('recipient_id')
-                    ->required()
-                    ->numeric(),
+                    ->required(),
                 TextInput::make('amount')
                     ->required()
                     ->numeric(),
@@ -31,8 +30,7 @@ class WithdrawalForm
                     ->options(WithdrawalStatus::class)
                     ->required(),
                 TextInput::make('requested_by')
-                    ->required()
-                    ->numeric(),
+                    ->required(),
             ]);
     }
 }

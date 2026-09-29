@@ -9,14 +9,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('withdrawals', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->string('recipient_type');
-            $table->unsignedBigInteger('recipient_id');
+            $table->uuid('recipient_id');
             $table->decimal('amount', 10, 2);
             $table->decimal('fee', 10, 2);
             $table->decimal('net_amount', 10, 2);
             $table->string('status');
-            $table->unsignedBigInteger('requested_by');
+            $table->uuid('requested_by');
             $table->timestamps();
 
             $table->index(['recipient_type', 'recipient_id']);

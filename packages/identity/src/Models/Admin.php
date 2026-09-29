@@ -10,6 +10,7 @@ use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 use Illuminate\Contracts\Auth\MustVerifyEmail as MustVerifyEmailContract;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\Access\Authorizable;
@@ -23,7 +24,7 @@ use Illuminate\Support\Carbon;
  * future feature needs "who did this" across apps, not because two apps
  * currently both authenticate admins.
  *
- * @property int $id
+ * @property string $id
  * @property bool $status
  * @property string $name
  * @property string $email
@@ -46,6 +47,7 @@ class Admin extends Model implements AuthenticatableContract, AuthorizableContra
     /** @use HasFactory<AdminFactory> */
     use HasFactory;
 
+    use HasUuids;
     use MustVerifyEmail;
     use Notifiable;
 

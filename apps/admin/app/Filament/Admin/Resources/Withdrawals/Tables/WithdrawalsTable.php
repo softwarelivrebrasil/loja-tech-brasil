@@ -17,8 +17,7 @@ class WithdrawalsTable
                 TextColumn::make('recipient_type')
                     ->searchable(),
                 TextColumn::make('recipient_id')
-                    ->numeric()
-                    ->sortable(),
+                    ->searchable(),
                 TextColumn::make('amount')
                     ->numeric()
                     ->sortable(),
@@ -32,8 +31,7 @@ class WithdrawalsTable
                     ->badge()
                     ->searchable(),
                 TextColumn::make('requested_by')
-                    ->numeric()
-                    ->sortable(),
+                    ->searchable(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

@@ -3,10 +3,13 @@
 namespace Loja\Withdrawals\Models;
 
 use Loja\Withdrawals\Enums\WithdrawalStatus;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
 class Withdrawal extends Model
 {
+    use HasUuids;
+
     protected $table = 'withdrawals';
 
     protected $fillable = [

@@ -10,6 +10,7 @@ use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 use Illuminate\Contracts\Auth\MustVerifyEmail as MustVerifyEmailContract;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\Access\Authorizable;
@@ -24,7 +25,7 @@ use Illuminate\Support\Carbon;
  * subclass in whichever app's app/Models/User.php needs them, so this
  * package never depends on Filament.
  *
- * @property int $id
+ * @property string $id
  * @property bool $status
  * @property string $name
  * @property string $email
@@ -47,6 +48,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     /** @use HasFactory<UserFactory> */
     use HasFactory;
 
+    use HasUuids;
     use MustVerifyEmail;
     use Notifiable;
 
