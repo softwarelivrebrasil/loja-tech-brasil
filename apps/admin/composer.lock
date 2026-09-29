@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "22a6f13bc1f5032f347b2a8034d4c54c",
+    "content-hash": "d55129fb08725cf0f7abb9827ea81ae7",
     "packages": [
         {
             "name": "achyutn/filament-log-viewer",
@@ -4520,6 +4520,35 @@
                     "Loja\\Identity\\Tests\\": "tests/",
                     "Loja\\Identity\\Database\\Factories\\": "database/factories/",
                     "Loja\\Identity\\Database\\Seeders\\": "database/seeders/"
+                }
+            },
+            "license": [
+                "proprietary"
+            ],
+            "transport-options": {
+                "relative": true
+            }
+        },
+        {
+            "name": "loja/notifications",
+            "version": "1.0.0",
+            "dist": {
+                "type": "path",
+                "url": "../../packages/notifications",
+                "reference": "1526e28e530028758997224883018a5c12739f76"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Loja\\Notifications\\Providers\\NotificationsServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Loja\\Notifications\\": "src/",
+                    "Loja\\Notifications\\Tests\\": "tests/"
                 }
             },
             "license": [
@@ -13776,7 +13805,7 @@
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": "^8.3"
+        "php": "^8.4"
     },
     "platform-dev": {},
     "plugin-api-version": "2.9.0"
