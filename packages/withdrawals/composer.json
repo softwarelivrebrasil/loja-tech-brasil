@@ -1,0 +1,24 @@
+{
+	"name": "loja/withdrawals",
+	"description": "",
+	"type": "library",
+	"version": "1.0.0",
+	"license": "proprietary",
+	"require": {},
+	"autoload": {
+		"psr-4": {
+			"Loja\\Withdrawals\\": "src/",
+			"Loja\\Withdrawals\\Tests\\": "tests/",
+			"Loja\\Withdrawals\\Database\\Factories\\": "database/factories/",
+			"Loja\\Withdrawals\\Database\\Seeders\\": "database/seeders/"
+		}
+	},
+	"minimum-stability": "stable",
+	"extra": {
+		"laravel": {
+			"providers": [
+				"Loja\\Withdrawals\\Providers\\WithdrawalsServiceProvider"
+			]
+		}
+	}
+}
