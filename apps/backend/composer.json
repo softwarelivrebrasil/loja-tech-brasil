@@ -14,6 +14,7 @@
         "laravel/framework": "^13.17",
         "laravel/octane": "^2.20",
         "laravel/tinker": "^3.0",
+        "loja/communities": "^1.0.0",
         "loja/identity": "^1.0.0",
         "loja/notifications": "^1.0.0",
         "loja/withdrawals": "^1.0.0"
