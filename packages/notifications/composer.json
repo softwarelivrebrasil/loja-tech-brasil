@@ -1,0 +1,22 @@
+{
+	"name": "loja/notifications",
+	"description": "",
+	"type": "library",
+	"version": "1.0.0",
+	"license": "proprietary",
+	"require": {},
+	"autoload": {
+		"psr-4": {
+			"Loja\\Notifications\\": "src/",
+			"Loja\\Notifications\\Tests\\": "tests/"
+		}
+	},
+	"minimum-stability": "stable",
+	"extra": {
+		"laravel": {
+			"providers": [
+				"Loja\\Notifications\\Providers\\NotificationsServiceProvider"
+			]
+		}
+	}
+}

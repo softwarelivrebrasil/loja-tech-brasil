@@ -1,0 +1,24 @@
+{
+	"name": "loja/identity",
+	"description": "",
+	"type": "library",
+	"version": "1.0.0",
+	"license": "proprietary",
+	"require": {},
+	"autoload": {
+		"psr-4": {
+			"Loja\\Identity\\": "src/",
+			"Loja\\Identity\\Tests\\": "tests/",
+			"Loja\\Identity\\Database\\Factories\\": "database/factories/",
+			"Loja\\Identity\\Database\\Seeders\\": "database/seeders/"
+		}
+	},
+	"minimum-stability": "stable",
+	"extra": {
+		"laravel": {
+			"providers": [
+				"Loja\\Identity\\Providers\\IdentityServiceProvider"
+			]
+		}
+	}
+}
