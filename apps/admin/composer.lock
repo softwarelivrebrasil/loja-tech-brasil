@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d55129fb08725cf0f7abb9827ea81ae7",
+    "content-hash": "9f02defef3ae5bef43b4910e98bc9334",
     "packages": [
         {
             "name": "achyutn/filament-log-viewer",
@@ -4497,6 +4497,37 @@
                 }
             ],
             "time": "2026-09-28T18:12:51+00:00"
+        },
+        {
+            "name": "loja/communities",
+            "version": "1.0.0",
+            "dist": {
+                "type": "path",
+                "url": "../../packages/communities",
+                "reference": "eb410884df85d6a8e8477472590d453cc172ec1e"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Loja\\Communities\\Providers\\CommunitiesServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Loja\\Communities\\": "src/",
+                    "Loja\\Communities\\Tests\\": "tests/",
+                    "Loja\\Communities\\Database\\Factories\\": "database/factories/",
+                    "Loja\\Communities\\Database\\Seeders\\": "database/seeders/"
+                }
+            },
+            "license": [
+                "proprietary"
+            ],
+            "transport-options": {
+                "relative": true
+            }
         },
         {
             "name": "loja/identity",

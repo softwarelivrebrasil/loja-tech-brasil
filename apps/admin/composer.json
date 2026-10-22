@@ -8,6 +8,7 @@
     "require": {
         "php": "^8.4",
         "achyutn/filament-log-viewer": "^2.1",
+        "loja/communities": "^1.0.0",
         "loja/identity": "^1.0.0",
         "loja/notifications": "^1.0.0",
         "loja/withdrawals": "^1.0.0",

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cf723e63fdcc030c05dec375c211eb08",
+    "content-hash": "3f9bdd0715640784ac48ad669b72fe45",
     "packages": [
         {
             "name": "brick/math",
@@ -3014,6 +3014,38 @@
                 }
             ],
             "time": "2026-03-08T20:05:35+00:00"
+        },
+        {
+            "name": "loja/communities",
+            "version": "1.0.0",
+            "dist": {
+                "type": "path",
+                "url": "../../packages/communities",
+                "reference": "7c08b1686016da6502e8d79f176bf7e949f45c4b"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Loja\\Communities\\Providers\\CommunitiesServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Loja\\Communities\\": "src/",
+                    "Loja\\Communities\\Tests\\": "tests/",
+                    "Loja\\Communities\\Database\\Factories\\": "database/factories/",
+                    "Loja\\Communities\\Database\\Seeders\\": "database/seeders/"
+                }
+            },
+            "license": [
+                "proprietary"
+            ],
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
         },
         {
             "name": "loja/identity",
